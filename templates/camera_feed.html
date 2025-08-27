@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Camera Feed - AI Missing Person Detection System{% endblock %}
+
+{% block content %}
+<div class="text-center mb-4">
+    <h2 class="display-5 fw-bold text-primary">
+        <i class="fas fa-camera me-3"></i>
+        Live Camera Feed
+    </h2>
+    <p class="lead text-muted">
+        Real-time face detection and missing person recognition
+    </p>
+</div>
+
+<div class="row">
+    <!-- Camera Feed -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-video me-2"></i>
+                    Live Camera Stream
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="camera-feed">
+                    <img id="cameraFeed" src="{{ url_for('video_feed') }}" 
+                         class="img-fluid w-100" alt="Camera Feed">
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Green boxes: Detected missing persons
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Red boxes: Unknown persons
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detection Results -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-search me-2"></i>
+                    Detection Results
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="detectionResults">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-eye fa-3x mb-3"></i>
+                        <p>No detections yet...</p>
+                        <small>Looking for missing persons in the camera feed</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    System Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="mb-2">
+                            <i class="fas fa-circle text-success fa-2x"></i>
+                        </div>
+                        <small class="text-muted">Camera</small>
+                        <div><strong>Active</strong></div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-2">
+                            <i class="fas fa-brain text-primary fa-2x"></i>
+                        </div>
+                        <small class="text-muted">AI Detection</small>
+                        <div><strong>Running</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="card mt-3">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Controls
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="refreshFeed()">
+                        <i class="fas fa-sync-alt me-2"></i>
+                        Refresh Feed
+                    </button>
+                    <button class="btn btn-outline-success" onclick="toggleDetection()">
+                        <i class="fas fa-play me-2"></i>
+                        <span id="detectionToggle">Pause Detection</span>
+                    </button>
+                    <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-home me-2"></i>
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detection Alerts -->
+<div id="detectionAlerts" class="mt-4"></div>
+
+<!-- Instructions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h5 class="alert-heading">
+                <i class="fas fa-lightbulb me-2"></i>
+                How It Works
+            </h5>
+            <ul class="mb-0">
+                <li><strong>Face Detection:</strong> The system continuously scans the camera feed for faces.</li>
+                <li><strong>Recognition:</strong> Detected faces are compared against the missing persons database.</li>
+                <li><strong>Alerts:</strong> When a match is found, the person is highlighted with a green box.</li>
+                <li><strong>Unknown Persons:</strong> Faces not in the database are marked with red boxes.</li>
+                <li><strong>Real-time:</strong> Detection results update automatically as people move through the camera view.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let detectionActive = true;
+let lastDetectionTime = 0;
+
+// Function to refresh the camera feed
+function refreshFeed() {
+    const img = document.getElementById('cameraFeed');
+    img.src = "{{ url_for('video_feed') }}?" + new Date().getTime();
+}
+
+// Function to toggle detection
+function toggleDetection() {
+    detectionActive = !detectionActive;
+    const toggleBtn = document.getElementById('detectionToggle');
+    if (detectionActive) {
+        toggleBtn.innerHTML = '<i class="fas fa-pause me-2"></i>Pause Detection';
+        toggleBtn.className = 'btn btn-outline-success';
+    } else {
+        toggleBtn.innerHTML = '<i class="fas fa-play me-2"></i>Resume Detection';
+        toggleBtn.className = 'btn btn-outline-warning';
+    }
+}
+
+// Function to update detection results
+function updateDetectionResults() {
+    if (!detectionActive) return;
+
+    fetch('/detection_results')
+        .then(response => response.json())
+        .then(data => {
+            const resultsDiv = document.getElementById('detectionResults');
+            const alertsDiv = document.getElementById('detectionAlerts');
+            
+            if (data.length > 0) {
+                // Update results display
+                let resultsHTML = '<div class="list-group">';
+                data.forEach(person => {
+                    resultsHTML += `
+                        <div class="list-group-item list-group-item-success">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">${person.name}</h6>
+                                <small class="text-success">${person.confidence}%</small>
+                            </div>
+                            <p class="mb-1">Age: ${person.age} | Location: ${person.last_seen_location}</p>
+                            <small>Missing since: ${person.date_missing}</small>
+                        </div>
+                    `;
+                });
+                resultsHTML += '</div>';
+                resultsDiv.innerHTML = resultsHTML;
+
+                // Show detection alerts
+                const currentTime = Date.now();
+                if (currentTime - lastDetectionTime > 5000) { // Show alert every 5 seconds
+                    data.forEach(person => {
+                        showDetectionAlert(person);
+                    });
+                    lastDetectionTime = currentTime;
+                }
+            } else {
+                // No detections
+                resultsDiv.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-eye fa-3x mb-3"></i>
+                        <p>No detections yet...</p>
+                        <small>Looking for missing persons in the camera feed</small>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching detection results:', error);
+        });
+}
+
+// Function to show detection alert
+function showDetectionAlert(person) {
+    const alertsDiv = document.getElementById('detectionAlerts');
+    const alertId = 'alert-' + Date.now();
+    
+    const alertHTML = `
+        <div id="${alertId}" class="detection-alert alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                <div>
+                    <h5 class="alert-heading mb-1">Missing Person Detected!</h5>
+                    <p class="mb-1"><strong>${person.name}</strong> (Age: ${person.age}) has been detected in the camera feed.</p>
+                    <small>Confidence: ${person.confidence}% | Last seen: ${person.last_seen_location}</small>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    
+    alertsDiv.insertAdjacentHTML('afterbegin', alertHTML);
+    
+    // Auto-remove alert after 10 seconds
+    setTimeout(() => {
+        const alert = document.getElementById(alertId);
+        if (alert) {
+            alert.remove();
+        }
+    }, 10000);
+}
+
+// Update detection results every 2 seconds
+setInterval(updateDetectionResults, 2000);
+
+// Initial update
+updateDetectionResults();
+
+// Handle page visibility change
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        detectionActive = false;
+    } else {
+        detectionActive = true;
+    }
+});
+
+// Handle page unload
+window.addEventListener('beforeunload', function() {
+    // Clean up any resources if needed
+});
+</script>
+{% endblock %} 

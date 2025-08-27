@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Home - AI Missing Person Detection System{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-4 fw-bold text-primary mb-3">
+        <i class="fas fa-search-location me-3"></i>
+        AI-Based Missing Person Detection System
+    </h1>
+    <p class="lead text-muted">
+        Advanced facial recognition technology to help locate missing persons in real-time
+    </p>
+</div>
+
+<!-- System Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="card-title text-primary mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    System Overview
+                </h3>
+                <p class="card-text">
+                    This AI-powered system uses advanced computer vision and machine learning algorithms 
+                    to detect and identify missing persons in real-time camera feeds. The system can 
+                    analyze live video streams and compare detected faces against a database of missing persons, 
+                    providing instant alerts when matches are found.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feature Cards -->
+<div class="row mb-5">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="mb-3">
+                    <i class="fas fa-user-plus fa-3x text-primary"></i>
+                </div>
+                <h5 class="card-title">Add Missing Persons</h5>
+                <p class="card-text">
+                    Upload photos and details of missing persons to the database for real-time detection.
+                </p>
+                <a href="{{ url_for('add_person_page') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Person
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="mb-3">
+                    <i class="fas fa-camera fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title">Live Camera Feed</h5>
+                <p class="card-text">
+                    Monitor live camera feeds with real-time face detection and recognition capabilities.
+                </p>
+                <a href="{{ url_for('camera_feed') }}" class="btn btn-success">
+                    <i class="fas fa-video me-2"></i>View Feed
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="mb-3">
+                    <i class="fas fa-users fa-3x text-info"></i>
+                </div>
+                <h5 class="card-title">Manage Database</h5>
+                <p class="card-text">
+                    View and manage all missing persons in the database with detailed information.
+                </p>
+                <a href="{{ url_for('view_persons') }}" class="btn btn-info text-white">
+                    <i class="fas fa-database me-2"></i>View Database
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Technology Stack -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title text-primary mb-3">
+                    <i class="fas fa-cogs me-2"></i>
+                    Technology Stack
+                </h4>
+                <div class="row">
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-python fa-2x text-primary me-3"></i>
+                            <div>
+                                <strong>Python</strong><br>
+                                <small class="text-muted">Backend Logic</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-eye fa-2x text-success me-3"></i>
+                            <div>
+                                <strong>OpenCV</strong><br>
+                                <small class="text-muted">Computer Vision</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-flask fa-2x text-warning me-3"></i>
+                            <div>
+                                <strong>Flask</strong><br>
+                                <small class="text-muted">Web Framework</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-brain fa-2x text-info me-3"></i>
+                            <div>
+                                <strong>AI/ML</strong><br>
+                                <small class="text-muted">Face Recognition</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3 class="card-title">
+                    <i class="fas fa-users me-2"></i>
+                    Missing Persons
+                </h3>
+                <h2 class="display-4 fw-bold">{{ persons|length if persons else 0 }}</h2>
+                <p class="card-text">Currently in database</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h3 class="card-title">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    System Status
+                </h3>
+                <h2 class="display-4 fw-bold">Active</h2>
+                <p class="card-text">Ready for detection</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Instructions -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h5 class="alert-heading">
+                <i class="fas fa-lightbulb me-2"></i>
+                Getting Started
+            </h5>
+            <ol class="mb-0">
+                <li><strong>Add Missing Persons:</strong> Upload photos and details of missing persons to the database.</li>
+                <li><strong>Start Camera Feed:</strong> Monitor live camera feeds for real-time detection.</li>
+                <li><strong>View Results:</strong> Check detection results and manage the database.</li>
+                <li><strong>System Shutdown:</strong> Safely shut down the system when done.</li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %} 

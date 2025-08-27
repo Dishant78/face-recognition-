@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}View Missing Persons - AI Missing Person Detection System{% endblock %}
+
+{% block content %}
+<div class="text-center mb-4">
+    <h2 class="display-5 fw-bold text-primary">
+        <i class="fas fa-users me-3"></i>
+        Missing Persons Database
+    </h2>
+    <p class="lead text-muted">
+        View and manage all missing persons in the detection system
+    </p>
+</div>
+
+<!-- Statistics -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3 class="card-title">
+                    <i class="fas fa-users me-2"></i>
+                    Total Persons
+                </h3>
+                <h2 class="display-4 fw-bold">{{ persons|length }}</h2>
+                <p class="card-text">In database</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h3 class="card-title">
+                    <i class="fas fa-eye me-2"></i>
+                    Active Detection
+                </h3>
+                <h2 class="display-4 fw-bold">{{ persons|length }}</h2>
+                <p class="card-text">Being monitored</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h3 class="card-title">
+                    <i class="fas fa-database me-2"></i>
+                    System Status
+                </h3>
+                <h2 class="display-4 fw-bold">Ready</h2>
+                <p class="card-text">For detection</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cogs me-2"></i>
+                        Database Actions
+                    </h5>
+                    <div>
+                        <a href="{{ url_for('add_person_page') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Add New Person
+                        </a>
+                        <a href="{{ url_for('camera_feed') }}" class="btn btn-success">
+                            <i class="fas fa-camera me-2"></i>
+                            View Camera Feed
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Persons List -->
+{% if persons %}
+<div class="row">
+    {% for person in persons %}
+    <div class="col-lg-6 col-xl-4 mb-4">
+        <div class="card person-card h-100">
+            <div class="card-body">
+                <div class="row">
+                    <!-- Person Photo -->
+                    <div class="col-md-4 text-center">
+                        {% if person[6] and person[6].endswith(('.jpg', '.jpeg', '.png', '.gif')) %}
+                        <img src="{{ person[6] }}" alt="{{ person[1] }}" 
+                             class="img-fluid rounded mb-2" style="max-height: 120px; width: auto;">
+                        {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center mb-2" 
+                             style="height: 120px; width: 100%;">
+                            <i class="fas fa-user fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Person Details -->
+                    <div class="col-md-8">
+                        <h5 class="card-title text-primary mb-2">
+                            <i class="fas fa-user me-1"></i>
+                            {{ person[1] }}
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">Age:</small><br>
+                                <strong>{{ person[2] }}</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">ID:</small><br>
+                                <strong>#{{ person[0] }}</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <small class="text-muted">Last Seen:</small><br>
+                            <strong>{{ person[3] }}</strong>
+                        </div>
+                        
+                        <div class="mt-2">
+                            <small class="text-muted">Missing Since:</small><br>
+                            <strong>{{ person[4] }}</strong>
+                        </div>
+                        
+                        {% if person[5] %}
+                        <div class="mt-2">
+                            <small class="text-muted">Contact:</small><br>
+                            <strong>{{ person[5] }}</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if person[7] %}
+                <div class="mt-3">
+                    <small class="text-muted">Additional Info:</small><br>
+                    <small>{{ person[7] }}</small>
+                </div>
+                {% endif %}
+                
+                <!-- Action Buttons -->
+                <div class="mt-3">
+                    <div class="btn-group w-100" role="group">
+                        <button type="button" class="btn btn-outline-primary btn-sm" 
+                                onclick="viewPersonDetails({{ person[0] }})">
+                            <i class="fas fa-eye me-1"></i>
+                            View
+                        </button>
+                        <button type="button" class="btn btn-outline-warning btn-sm" 
+                                onclick="editPerson({{ person[0] }})">
+                            <i class="fas fa-edit me-1"></i>
+                            Edit
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                onclick="deletePerson({{ person[0] }}, '{{ person[1] }}')">
+                            <i class="fas fa-trash me-1"></i>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<!-- No Persons Found -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-users fa-5x text-muted mb-4"></i>
+                <h4 class="text-muted mb-3">No Missing Persons Found</h4>
+                <p class="text-muted mb-4">
+                    The database is currently empty. Add missing persons to start using the detection system.
+                </p>
+                <a href="{{ url_for('add_person_page') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>
+                    Add First Person
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Person Details Modal -->
+<div class="modal fade" id="personModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user me-2"></i>
+                    Person Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="personModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Function to view person details
+function viewPersonDetails(personId) {
+    // For now, just show a simple alert
+    // In a real implementation, you would fetch detailed information
+    alert('Detailed view for person ID: ' + personId + '\n\nThis would show:\n- Full details\n- Detection history\n- Photo gallery\n- Contact information');
+}
+
+// Function to edit person
+function editPerson(personId) {
+    // For now, redirect to add person page
+    // In a real implementation, you would load the form with existing data
+    if (confirm('Edit person ID: ' + personId + '?\n\nThis will redirect to the add person form.')) {
+        window.location.href = "{{ url_for('add_person_page') }}";
+    }
+}
+
+// Function to delete person
+function deletePerson(personId, personName) {
+    if (confirm('Are you sure you want to delete "' + personName + '"?\n\nThis action cannot be undone.')) {
+        // Create a form to submit the delete request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/delete_person/' + personId;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Search functionality
+function searchPersons() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const personCards = document.querySelectorAll('.person-card');
+    
+    personCards.forEach(card => {
+        const personName = card.querySelector('.card-title').textContent.toLowerCase();
+        const personLocation = card.querySelector('strong').textContent.toLowerCase();
+        
+        if (personName.includes(searchTerm) || personLocation.includes(searchTerm)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// Sort functionality
+function sortPersons(criteria) {
+    const container = document.querySelector('.row');
+    const personCards = Array.from(container.querySelectorAll('.col-lg-6.col-xl-4'));
+    
+    personCards.sort((a, b) => {
+        let aValue, bValue;
+        
+        switch(criteria) {
+            case 'name':
+                aValue = a.querySelector('.card-title').textContent;
+                bValue = b.querySelector('.card-title').textContent;
+                break;
+            case 'age':
+                aValue = parseInt(a.querySelector('strong').textContent);
+                bValue = parseInt(b.querySelector('strong').textContent);
+                break;
+            case 'date':
+                aValue = new Date(a.querySelectorAll('strong')[1].textContent);
+                bValue = new Date(b.querySelectorAll('strong')[1].textContent);
+                break;
+            default:
+                return 0;
+        }
+        
+        if (aValue < bValue) return -1;
+        if (aValue > bValue) return 1;
+        return 0;
+    });
+    
+    // Re-append sorted cards
+    personCards.forEach(card => container.appendChild(card));
+}
+</script>
+{% endblock %} 
